@@ -10,6 +10,30 @@ const DEFAULT_DIMENSIONS = {
   depth: 12,
 };
 
+const DIMENSION_FIELDS = [
+  {
+    key: 'width',
+    label: 'Width',
+    helper: 'Left to right span',
+    min: 5,
+    max: 60,
+  },
+  {
+    key: 'height',
+    label: 'Height',
+    helper: 'Base to top',
+    min: 5,
+    max: 40,
+  },
+  {
+    key: 'depth',
+    label: 'Depth',
+    helper: 'Front to back',
+    min: 5,
+    max: 60,
+  },
+];
+
 const RATE_PER_CUBIC_CM = 0.08;
 const MIN_ORDER_TOTAL = 45;
 
@@ -40,12 +64,20 @@ export default function App() {
     [height]
   );
 
-  const handleChange = (key) => (event) => {
-    const nextValue = Number(event.target.value);
+  const setDimensionValue = (key, rawValue) => {
+    const nextValue = Number(rawValue);
     setDimensions((current) => ({
       ...current,
       [key]: Number.isFinite(nextValue) ? nextValue : 0,
     }));
+  };
+
+  const handleInputChange = (key) => (event) => {
+    setDimensionValue(key, event.target.value);
+  };
+
+  const handleSliderChange = (key) => (event) => {
+    setDimensionValue(key, event.target.value);
   };
 
   const isValid = width > 0 && height > 0 && depth > 0;
@@ -101,25 +133,46 @@ export default function App() {
         </div>
 
         <form className="form-grid" aria-label="Acrylic dimensions">
-          {[{ key: 'width', label: 'Width', helper: 'Left to right span' },
-            { key: 'height', label: 'Height', helper: 'Base to top' },
-            { key: 'depth', label: 'Depth', helper: 'Front to back' }].map(
-            ({ key, label, helper }) => (
-              <label key={key} className="label">
-                {label} (cm)
+          {DIMENSION_FIELDS.map(({ key, label, helper, min, max }) => {
+            const clampedValue = Math.min(Math.max(dimensions[key], min), max);
+            const sliderRange = Math.max(max - min, 0.0001);
+            const sliderProgress = ((clampedValue - min) / sliderRange) * 100;
+            const sliderGradient =
+              `linear-gradient(90deg, #2563eb 0%, #2563eb ${sliderProgress}%, ` +
+              `rgba(148, 163, 184, 0.35) ${sliderProgress}%, rgba(148, 163, 184, 0.35) 100%)`;
+
+            return (
+              <fieldset key={key} className="dimension-field">
+                <legend className="dimension-label">
+                  <span>{label} (cm)</span>
+                  <span className="dimension-value">{formatNumber(dimensions[key])}</span>
+                </legend>
                 <input
-                  type="number"
-                  min="0.1"
+                  type="range"
+                  min={min}
+                  max={max}
                   step="0.1"
-                  value={dimensions[key]}
-                  onChange={handleChange(key)}
-                  inputMode="numeric"
+                  value={clampedValue}
+                  onChange={handleSliderChange(key)}
                   aria-describedby={`${key}-helper`}
+                  style={{ background: sliderGradient }}
                 />
-                <small id={`${key}-helper`}>{helper}</small>
-              </label>
-            )
-          )}
+                <div className="dimension-input-row">
+                  <input
+                    type="number"
+                    min={min}
+                    max={max}
+                    step="0.1"
+                    value={dimensions[key]}
+                    onChange={handleInputChange(key)}
+                    inputMode="decimal"
+                    aria-describedby={`${key}-helper`}
+                  />
+                  <small id={`${key}-helper`}>{helper}</small>
+                </div>
+              </fieldset>
+            );
+          })}
         </form>
 
         <section className="summary" aria-live="polite">
