@@ -1,18 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useState } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import { BoxGeometry, EdgesGeometry } from 'three';
 import './App.css';
 
 const DEFAULT_DIMENSIONS = {
-  width: 150,
-  height: 100,
-  depth: 120,
+  width: 15,
+  height: 10,
+  depth: 12,
 };
 
 const RATE_PER_CUBIC_CM = 0.08;
 const MIN_ORDER_TOTAL = 45;
-const MM3_TO_CM3 = 1 / 1000;
-const MM2_TO_CM2 = 1 / 100;
 
 const formatNumber = (value) =>
   new Intl.NumberFormat('en-US', {
@@ -20,16 +19,13 @@ const formatNumber = (value) =>
   }).format(value);
 
 function dimensionSummary({ width, height, depth }) {
-  const volumeMm3 = width * height * depth;
-  const surfaceAreaMm2 = 2 * (width * height + width * depth + height * depth);
-
-  const volumeCm3 = volumeMm3 * MM3_TO_CM3;
-  const surfaceAreaCm2 = surfaceAreaMm2 * MM2_TO_CM2;
-  const price = Math.max(volumeCm3 * RATE_PER_CUBIC_CM, MIN_ORDER_TOTAL);
+  const volume = width * height * depth;
+  const surfaceArea = 2 * (width * height + width * depth + height * depth);
+  const price = Math.max(volume * RATE_PER_CUBIC_CM, MIN_ORDER_TOTAL);
 
   return {
-    volume: volumeCm3,
-    surfaceArea: surfaceAreaCm2,
+    volume,
+    surfaceArea,
     price,
   };
 }
@@ -39,6 +35,10 @@ export default function App() {
 
   const { width, height, depth } = dimensions;
   const summary = useMemo(() => dimensionSummary(dimensions), [dimensions]);
+  const previewTarget = useMemo(
+    () => [0, BASE_HEIGHT + (Math.max(height, 0.1) * PREVIEW_SCALE) / 2, 0],
+    [height]
+  );
 
   const handleChange = (key) => (event) => {
     const nextValue = Number(event.target.value);
@@ -57,7 +57,7 @@ export default function App() {
           <h1>Acrylic 3D Designer</h1>
           <p>
             Configure a custom acrylic enclosure by entering the exact dimensions
-            in millimetres. We will simulate the volume, estimate material usage,
+            in centimetres. We will simulate the volume, estimate material usage,
             and prepare it for checkout.
           </p>
         </header>
@@ -84,11 +84,19 @@ export default function App() {
               penumbra={0.5}
             />
             <PreviewScene width={width} height={height} depth={depth} />
+            <OrbitControls
+              enablePan={false}
+              minDistance={4}
+              maxDistance={15}
+              minPolarAngle={Math.PI / 6}
+              maxPolarAngle={(Math.PI * 5) / 6}
+              target={previewTarget}
+            />
           </Canvas>
           <div className="preview-dimensions">
-            <span>W: {formatNumber(width)} mm</span>
-            <span>H: {formatNumber(height)} mm</span>
-            <span>D: {formatNumber(depth)} mm</span>
+            <span>W: {formatNumber(width)} cm</span>
+            <span>H: {formatNumber(height)} cm</span>
+            <span>D: {formatNumber(depth)} cm</span>
           </div>
         </div>
 
@@ -98,11 +106,11 @@ export default function App() {
             { key: 'depth', label: 'Depth', helper: 'Front to back' }].map(
             ({ key, label, helper }) => (
               <label key={key} className="label">
-                {label} (mm)
+                {label} (cm)
                 <input
                   type="number"
-                  min="1"
-                  step="1"
+                  min="0.1"
+                  step="0.1"
                   value={dimensions[key]}
                   onChange={handleChange(key)}
                   inputMode="numeric"
@@ -149,29 +157,21 @@ export default function App() {
   );
 }
 
-const PREVIEW_SCALE = 0.01;
+const PREVIEW_SCALE = 0.1;
 const BASE_HEIGHT = 0.2;
 
 function PreviewScene({ width, height, depth }) {
-  const groupRef = useRef();
   const scaled = useMemo(
     () => ({
-      width: Math.max(width, 1) * PREVIEW_SCALE,
-      height: Math.max(height, 1) * PREVIEW_SCALE,
-      depth: Math.max(depth, 1) * PREVIEW_SCALE,
+      width: Math.max(width, 0.1) * PREVIEW_SCALE,
+      height: Math.max(height, 0.1) * PREVIEW_SCALE,
+      depth: Math.max(depth, 0.1) * PREVIEW_SCALE,
     }),
     [width, height, depth]
   );
 
-  useFrame(({ clock }) => {
-    if (!groupRef.current) return;
-    const time = clock.getElapsedTime();
-    groupRef.current.rotation.y = 0.6 + Math.sin(time / 3) * 0.25;
-    groupRef.current.rotation.x = 0.25 + Math.sin(time / 4) * 0.06;
-  });
-
   return (
-    <group ref={groupRef} position={[0, -0.4, 0]}>
+    <group position={[0, -0.4, 0]} rotation={[0.25, 0.6, 0]}>
       <Base width={scaled.width} depth={scaled.depth} />
       <AcrylicEnclosure dimensions={scaled} />
       <MockFigure dimensions={scaled} />
