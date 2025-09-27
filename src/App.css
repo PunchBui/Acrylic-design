@@ -2,20 +2,21 @@
   display: grid;
   gap: 2rem;
   color: #0f172a;
+  min-height: calc(100dvh - 4rem);
 }
 
 .card {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 1.5rem;
-  padding: 2rem;
+  padding: clamp(1.5rem, 3vw, 2rem);
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
   display: grid;
-  gap: 1.75rem;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
 }
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.8rem, 4vw, 3rem);
 }
 
 p {
@@ -26,9 +27,9 @@ p {
 
 .preview {
   position: relative;
-  min-height: clamp(240px, 45vw, 420px);
+  min-height: clamp(220px, 42vw, 420px);
   border-radius: 1.25rem;
-  background: radial-gradient(circle at top, #bae6fd, #e0e7ff 55%, #c7d2fe 100%);
+  background: radial-gradient(circle at 20% 10%, #bae6fd, #e0e7ff 55%, #c7d2fe 100%);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -61,7 +62,7 @@ p {
 
 .form-grid {
   display: grid;
-  gap: 1.25rem;
+  gap: clamp(1rem, 2vw, 1.25rem);
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
@@ -112,8 +113,8 @@ input[type='number'] {
   width: 100%;
   border-radius: 0.75rem;
   border: 1px solid #cbd5f5;
-  padding: 0.75rem 1rem;
-  font-size: 1rem;
+  padding: clamp(0.6rem, 1.6vw, 0.75rem) clamp(0.9rem, 2vw, 1rem);
+  font-size: clamp(0.95rem, 2.5vw, 1rem);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -179,7 +180,7 @@ input[type='range']::-moz-range-thumb:hover {
 .summary {
   background: #eef2ff;
   border-radius: 1rem;
-  padding: 1.5rem;
+  padding: clamp(1.1rem, 3vw, 1.5rem);
   text-align: left;
   color: #1e1b4b;
   display: grid;
@@ -219,23 +220,24 @@ input[type='range']::-moz-range-thumb:hover {
 
 @media (max-width: 600px) {
   body {
-    padding: 1.25rem 0 2.5rem;
-    align-items: flex-start;
+    padding: 0;
+    align-items: stretch;
+    min-height: 100dvh;
   }
 
   #root {
-    width: min(100%, 560px);
-    padding: 1.5rem 1.25rem 2.5rem;
+    width: 100%;
+    padding: 1.25rem 1.25rem 1.75rem;
   }
 
   .card {
-    padding: 1.5rem;
+    padding: 1.35rem;
     border-radius: 1.25rem;
-    gap: 1.5rem;
+    gap: 1.25rem;
   }
 
   .preview {
-    min-height: 260px;
+    min-height: min(260px, 55vh);
   }
 
   .dimension-label {
@@ -245,7 +247,22 @@ input[type='range']::-moz-range-thumb:hover {
   }
 
   .dimension-field {
-    padding: 1rem 1.1rem;
+    padding: 0.95rem 1.05rem;
+  }
+
+  .summary-data {
+    gap: 0.1rem;
+  }
+
+  .summary-data span {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .checkout button {
+    width: 100%;
+    padding: 0.7em 1.2em;
   }
 }
 
@@ -260,6 +277,20 @@ input[type='range']::-moz-range-thumb:hover {
   }
 
   .dimension-field {
-    padding: 0.9rem 1rem;
+    padding: 0.85rem 0.95rem;
+  }
+
+  h1 {
+    font-size: clamp(1.6rem, 7vw, 2.1rem);
+  }
+
+  p,
+  .dimension-label,
+  .summary h2 {
+    font-size: 0.95rem;
+  }
+
+  .preview-dimensions {
+    font-size: 0.8rem;
   }
 }

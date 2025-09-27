@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { BoxGeometry, EdgesGeometry } from 'three';
+import { ContactShadows, Environment, OrbitControls } from '@react-three/drei';
+import { BackSide, BoxGeometry, EdgesGeometry } from 'three';
 import './App.css';
 
 const DEFAULT_DIMENSIONS = {
@@ -116,6 +116,15 @@ export default function App() {
               penumbra={0.5}
             />
             <PreviewScene width={width} height={height} depth={depth} />
+            <ContactShadows
+              frames={60}
+              position={[0, 0, 0]}
+              opacity={0.32}
+              scale={8}
+              blur={2.75}
+              far={2}
+            />
+            <Environment preset="sunset" background={false} blur={0.4} />
             <OrbitControls
               enablePan={false}
               minDistance={4}
@@ -261,23 +270,38 @@ function AcrylicEnclosure({ dimensions }) {
   );
 
   return (
-    <group position={[0, BASE_HEIGHT + height / 2, 0]}
-    >
+    <group position={[0, BASE_HEIGHT + height / 2, 0]}>
       <mesh geometry={geometry} castShadow>
         <meshPhysicalMaterial
-          color="#60a5fa"
+          color="#8ec5ff"
+          transparent
+          opacity={0.28}
+          roughness={0.08}
+          metalness={0.05}
+          clearcoat={1}
+          clearcoatRoughness={0.12}
+          transmission={1}
+          thickness={1.8}
+          ior={1.48}
+          attenuationColor="#60a5fa"
+          attenuationDistance={1.25}
+          reflectivity={1}
+          iridescence={0.08}
+          iridescenceIOR={1.3}
+        />
+      </mesh>
+      <mesh geometry={geometry} scale={[1.01, 1.01, 1.01]}
+        frustumCulled={false}
+      >
+        <meshBasicMaterial
+          color="#bfdbfe"
+          side={BackSide}
           transparent
           opacity={0.18}
-          roughness={0.2}
-          metalness={0.1}
-          clearcoat={0.9}
-          clearcoatRoughness={0.2}
-          transmission={0.95}
-          thickness={0.6}
         />
       </mesh>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial color="#2563eb" linewidth={1} />
+        <lineBasicMaterial color="#1d4ed8" linewidth={1} />
       </lineSegments>
     </group>
   );
