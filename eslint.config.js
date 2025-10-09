@@ -37,6 +37,11 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...reactPlugin.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
+      // React Three Fiber uses non-DOM JSX props (e.g., position, args, castShadow)
+      // that are valid in the R3F renderer but unknown to React DOM lint rules.
+      'react/no-unknown-property': 'off',
+      // This project does not use PropTypes; disable to avoid noisy errors.
+      'react/prop-types': 'off',
     },
   },
 ];
