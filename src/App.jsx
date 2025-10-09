@@ -37,10 +37,12 @@ const DIMENSION_FIELDS = [
 const RATE_PER_CUBIC_CM = 0.08;
 const MIN_ORDER_TOTAL = 45;
 
-const formatNumber = (value) =>
-  new Intl.NumberFormat('en-US', {
-    maximumFractionDigits: 2,
-  }).format(value);
+// Reuse a single formatter instance to avoid repeated constructions per render.
+const NUMBER_FORMATTER = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 2,
+});
+
+const formatNumber = (value) => NUMBER_FORMATTER.format(value);
 
 function dimensionSummary({ width, height, depth }) {
   const volume = width * height * depth;
@@ -65,10 +67,24 @@ export default function App() {
   );
 
   const setDimensionValue = (key, rawValue) => {
-    const nextValue = Number(rawValue);
+    // Clamp to the configured min/max and snap to the 0.1 step to
+    // prevent negative/invalid values and floating point drift.
+    const field = DIMENSION_FIELDS.find((f) => f.key === key);
+    const min = field?.min ?? 0;
+    const max = field?.max ?? Number.POSITIVE_INFINITY;
+
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) {
+      // Ignore invalid input rather than forcing it to 0
+      return;
+    }
+
+    const clamped = Math.min(Math.max(parsed, min), max);
+    const snapped = Math.round(clamped * 10) / 10; // match step="0.1"
+
     setDimensions((current) => ({
       ...current,
-      [key]: Number.isFinite(nextValue) ? nextValue : 0,
+      [key]: snapped,
     }));
   };
 
@@ -263,8 +279,9 @@ function AcrylicEnclosure({ dimensions }) {
 
   useEffect(
     () => () => {
-      geometry.dispose();
+      // Dispose in an order that avoids accessing a freed dependency
       edges.dispose();
+      geometry.dispose();
     },
     [geometry, edges]
   );
@@ -301,7 +318,7 @@ function AcrylicEnclosure({ dimensions }) {
         />
       </mesh>
       <lineSegments geometry={edges}>
-        <lineBasicMaterial color="#1d4ed8" linewidth={1} />
+        <lineBasicMaterial color="#1d4ed8" />
       </lineSegments>
     </group>
   );
