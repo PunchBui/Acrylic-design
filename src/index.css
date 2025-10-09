@@ -1,3 +1,21 @@
+/* Ensure padding/border are included in element widths */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Media elements scale within containers */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -9,6 +27,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 a,
@@ -22,13 +41,17 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  /* Modern mobile viewport units for stable height on mobile */
+  min-height: 100dvh;
+  min-height: 100svh;
 }
 
 #root {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  width: min(960px, 90vw);
+  /* Keep padding inside the width (with border-box) to avoid overflow */
+  width: min(960px, 100%);
 }
 
 button {
