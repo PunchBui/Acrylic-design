@@ -156,6 +156,8 @@ input[type='range']::-webkit-slider-thumb {
   border: 2px solid #bfdbfe;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
   transition: transform 0.2s ease;
+  /* Center the thumb precisely on the 6px track */
+  margin-top: -7px;
 }
 
 input[type='range']::-moz-range-thumb {
@@ -166,6 +168,8 @@ input[type='range']::-moz-range-thumb {
   border: 2px solid #bfdbfe;
   box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
   transition: transform 0.2s ease;
+  /* Align firefox thumb vertically with the track */
+  margin-top: -6px;
 }
 
 input[type='range']:focus-visible {
@@ -225,11 +229,24 @@ input[type='range']::-moz-range-thumb:hover {
     padding: 0;
     align-items: stretch;
     min-height: 100dvh;
+    height: 100svh;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   #root {
     width: 100%;
-    padding: 1.25rem 1.25rem 1.75rem;
+    height: 100svh;
+    padding: 1rem;
+  }
+
+  .app {
+    min-height: calc(100svh - 2rem);
+  }
+
+  /* Hide non-essential hero content to save vertical space */
+  .card > header {
+    display: none;
   }
 
   .card {
@@ -239,7 +256,11 @@ input[type='range']::-moz-range-thumb:hover {
   }
 
   .preview {
-    min-height: min(260px, 50vh);
+    min-height: min(220px, 38vh);
+  }
+  /* Improve touch control and avoid page scroll while dragging */
+  .preview-canvas {
+    touch-action: none;
   }
 
   .dimension-label {
@@ -299,5 +320,13 @@ input[type='range']::-moz-range-thumb:hover {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+  /* Further tighten layout and hide helper text on very small screens */
+  .preview {
+    min-height: min(200px, 34vh);
+  }
+
+  .checkout small {
+    display: none;
   }
 }
